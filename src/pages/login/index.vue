@@ -73,16 +73,17 @@ const handleSubmit = async () => {
       password: formState.password,
     });
 
-    // 响应拦截器已经返回了 data.data，所以 response 直接就是 { token, user_id, username }
+    // 响应拦截器返回的是完整的 data 对象，包含 { code, message, data: { token, user_id, username } }
     console.log('登录响应:', response);
 
-    // 保存 token
-    userStore.setToken(response.token);
+    // 从 response.data 中获取实际的登录数据
+    const loginData = (response as any).data || response;
+    userStore.setToken(loginData.token);
 
     // 转换并保存用户信息：将 API 返回的格式转换为前端需要的格式
     userStore.setUserInfo({
-      id: String(response.user_id), // user_id 转为字符串 id
-      name: response.username, // username 转为 name
+      id: String(loginData.user_id), // user_id 转为字符串 id
+      name: loginData.username, // username 转为 name
       avatar: undefined,
       role: undefined,
     });

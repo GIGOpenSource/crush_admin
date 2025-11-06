@@ -51,7 +51,8 @@ const transform: AxiosTransform = {
     // 这里逻辑可以根据项目进行修改
     const hasSuccess = data && code === 200;
     if (hasSuccess) {
-      return data.data;
+      // 返回 data 对象中的所有数据，而不仅仅是 data.data
+      return data;
     }
 
     // 错误提示
