@@ -13,7 +13,7 @@ export interface UserItem {
 }
 
 export interface UserListParams {
-  page?: number;
+  currentPage?: number;
   pageSize?: number;
   keyword?: string; // 搜索关键词（用户ID、昵称）
 }
@@ -21,7 +21,7 @@ export interface UserListParams {
 export interface UserListResponse {
   list: UserItem[];
   total: number;
-  page: number;
+  currentPage: number;
   pageSize: number;
 }
 
@@ -29,7 +29,7 @@ export interface UserListResponse {
  * 获取用户列表
  */
 export const getUserListApi = (params?: UserListParams) => {
-  return request.get<UserListResponse>({ url: '/users', params });
+  return request.get<UserListResponse>({ url: '/wechat/', params });
 };
 
 /**

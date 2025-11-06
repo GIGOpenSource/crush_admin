@@ -136,7 +136,7 @@ const loadData = async () => {
   try {
     loading.value = true;
     const params = {
-      page: paginationConfig.current,
+      currentPage: paginationConfig.current,
       pageSize: paginationConfig.pageSize,
       keyword: searchKeyword.value || undefined,
     };
