@@ -155,8 +155,8 @@ const transform: AxiosTransform = {
       // jwt token
       const authenticationScheme = options.authenticationScheme || '';
       (config.headers as Recordable).Authorization = authenticationScheme
-        ? `${authenticationScheme} ${token}`
-        : `Bearer ${token}`;
+        ? `${token}`
+        : `${token}`;
     }
 
     // 开发环境下打印请求信息，方便调试
