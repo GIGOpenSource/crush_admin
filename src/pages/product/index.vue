@@ -16,6 +16,9 @@
             <template v-if="column.key === 'price'">
               <span>¥{{ record.price }}</span>
             </template>
+            <template v-else-if="column.key === 'days'">
+              <span>{{ record.days === 0 || record.days === null || record.days === undefined ? '--' : `${record.days}日` }}</span>
+            </template>
             <template v-else-if="column.key === 'action'">
               <a-button type="link" size="small" @click="handleEdit(record)">编辑</a-button>
             </template>
@@ -29,6 +32,8 @@
       v-model:open="editModalVisible"
       title="编辑商品"
       :confirm-loading="submitLoading"
+      ok-text="确定"
+      cancel-text="取消"
       @ok="handleSubmit"
       @cancel="handleCancel"
     >
@@ -39,9 +44,9 @@
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-item label="商品类型" name="productType">
+        <!-- <a-form-item label="商品类型" name="productType">
           <a-input v-model:value="formState.productType" placeholder="请输入商品类型" />
-        </a-form-item>
+        </a-form-item> -->
         <a-form-item label="商品价格" name="price">
           <a-input-number
             v-model:value="formState.price"
@@ -51,8 +56,14 @@
             placeholder="请输入商品价格"
           />
         </a-form-item>
-        <a-form-item label="有效期" name="validityPeriod">
-          <a-input v-model:value="formState.validityPeriod" placeholder="请输入有效期，如：30日 或 -" />
+        <a-form-item label="有效期" name="days">
+          <a-input-number
+            v-model:value="formState.days"
+            :min="0"
+            :precision="0"
+            style="width: 100%"
+            placeholder="请输入有效期天数"
+          />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -77,13 +88,13 @@ const dataSource = ref<ProductItem[]>([]);
 const formState = reactive({
   productType: '',
   price: 0,
-  validityPeriod: '',
+  days: 0,
 });
 
 const rules = {
-  productType: [{ required: true, message: '请输入商品类型', trigger: 'blur' }],
+  // productType: [{ required: true, message: '请输入商品类型', trigger: 'blur' }],
   price: [{ required: true, message: '请输入商品价格', trigger: 'blur' }],
-  validityPeriod: [{ required: true, message: '请输入有效期', trigger: 'blur' }],
+  days: [{ required: true, message: '请输入有效期', trigger: 'blur' }],
 };
 
 const columns: TableColumnsType = [
@@ -95,8 +106,8 @@ const columns: TableColumnsType = [
   },
   {
     title: '商品类型',
-    dataIndex: 'productType',
-    key: 'productType',
+    dataIndex: 'name',
+    key: 'name',
   },
   {
     title: '商品价格',
@@ -105,8 +116,8 @@ const columns: TableColumnsType = [
   },
   {
     title: '有效期',
-    dataIndex: 'validityPeriod',
-    key: 'validityPeriod',
+    dataIndex: 'days',
+    key: 'days',
   },
   {
     title: '操作',
@@ -126,9 +137,8 @@ const paginationConfig = reactive({
 
 const handleEdit = (record: ProductItem) => {
   currentEditId.value = record.id;
-  formState.productType = record.productType;
   formState.price = record.price;
-  formState.validityPeriod = record.validityPeriod;
+  formState.days = record.days;
   editModalVisible.value = true;
 };
 
@@ -145,9 +155,8 @@ const handleSubmit = async () => {
     }
 
     await updateProductApi(currentEditId.value, {
-      productType: formState.productType,
       price: formState.price,
-      validityPeriod: formState.validityPeriod,
+      days: formState.days,
     });
 
     message.success('修改成功');
@@ -173,13 +182,21 @@ const handleCancel = () => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const response = await getProductListApi();
-    // dataSource.value = response
-    paginationConfig.total = dataSource.value.length;
+    const response: any = await getProductListApi();
+    // 响应拦截器返回的是完整的 data 对象，包含 { code, message, data: { results, pagination } }
+    if (response && response.data) {
+      dataSource.value = response.data.results || [];
+      paginationConfig.total = response.data.pagination?.total || 0;
+    } else {
+      dataSource.value = [];
+      paginationConfig.total = 0;
+    }
+    console.log('商品列表数据:', dataSource.value);
   } catch (error: any) {
     console.error('获取商品列表失败:', error);
     message.error(error?.message || '获取商品列表失败');
     dataSource.value = [];
+    paginationConfig.total = 0;
   } finally {
     loading.value = false;
   }
