@@ -14,15 +14,60 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/layouts/index.vue'),
-    redirect: '/home',
+    redirect: '/user',
     children: [
       {
-        path: '/home',
-        name: 'Home',
-        component: () => import('@/pages/home/index.vue'),
+        path: '/user',
+        name: 'User',
+        component: () => import('@/pages/user/index.vue'),
         meta: {
-          title: '首页',
-          icon: 'HomeOutlined',
+          title: '用户管理',
+          icon: 'UserOutlined',
+        },
+      },
+      {
+        path: '/order',
+        name: 'Order',
+        component: () => import('@/pages/order/index.vue'),
+        meta: {
+          title: '订单管理',
+          icon: 'ShoppingCartOutlined',
+        },
+      },
+      {
+        path: '/ai-config',
+        name: 'AIConfig',
+        component: () => import('@/pages/ai-config/index.vue'),
+        meta: {
+          title: 'AI配置',
+          icon: 'SettingOutlined',
+        },
+      },
+      {
+        path: '/template',
+        name: 'Template',
+        component: () => import('@/pages/template/index.vue'),
+        meta: {
+          title: '模板管理',
+          icon: 'FileTextOutlined',
+        },
+      },
+      {
+        path: '/template-library',
+        name: 'TemplateLibrary',
+        component: () => import('@/pages/template-library/index.vue'),
+        meta: {
+          title: '模板库',
+          icon: 'FolderOutlined',
+        },
+      },
+      {
+        path: '/product',
+        name: 'Product',
+        component: () => import('@/pages/product/index.vue'),
+        meta: {
+          title: '商品管理',
+          icon: 'ShoppingOutlined',
         },
       },
     ],
@@ -37,7 +82,7 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
   
   if (to.path === '/login') {
