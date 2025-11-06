@@ -8,6 +8,13 @@ export interface LoginParams {
   password: string;
 }
 
+// API 实际返回的数据格式
+export interface LoginResponseData {
+  token: string;
+  user_id: number;
+  username: string;
+}
+
 export interface LoginResponse {
   token: string;
   userInfo: {
@@ -22,20 +29,23 @@ export interface LoginResponse {
  * 用户登录
  */
 export const loginApi = (data: LoginParams) => {
-  return request.post<LoginResponse>('/auth/login', { data });
+  return request.post<LoginResponseData>(
+    { url: '/api/users/login/', data },
+    { withToken: false }
+  );
 };
 
 /**
  * 获取用户信息
  */
 export const getUserInfoApi = () => {
-  return request.get('/auth/userInfo');
+  return request.get({ url: '/auth/userInfo' });
 };
 
 /**
  * 退出登录
  */
 export const logoutApi = () => {
-  return request.post('/auth/logout');
+  return request.post({ url: '/auth/logout' });
 };
 

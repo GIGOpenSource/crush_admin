@@ -33,10 +33,15 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       open: true,
       proxy: {
-        [env.VITE_API_URL_PREFIX]: {
-          target: env.VITE_API_URL,
+        '/api': {
+          target: env.VITE_API_URL || 'http://localhost:8000',
           changeOrigin: true,
-          rewrite: (path) => path.replace(new RegExp(`^${env.VITE_API_URL_PREFIX}`), ''),
+          rewrite: (path) => {
+            // 移除 /api 前缀，转发到后端服务器
+            const newPath = path.replace(/^\/api/, '');
+            console.log(`代理请求: ${path} -> ${env.VITE_API_URL || 'http://localhost:8000'}${newPath}`);
+            return newPath;
+          },
         },
       },
     },

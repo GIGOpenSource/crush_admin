@@ -5,11 +5,23 @@ import { useUserStore } from '@/store/modules/user';
 import { VAxios } from './Axios';
 import type { AxiosTransform, CreateAxiosOptions } from './Axios';
 import { formatRequestDate, joinTimestamp, setObjToUrlParams } from './utils';
-import type { Recordable } from '@/types/axios';
+import type { AxiosRequestConfigRetry, Recordable } from '@/types/axios';
 
 // 是否启用代理，如果启用代理则使用 Vite 代理，否则使用完整 URL
 // 默认使用 Vite 代理（开发环境），如需直连服务器，设置 VITE_IS_REQUEST_PROXY=false
-const host = import.meta.env.VITE_IS_REQUEST_PROXY === 'false' ? import.meta.env.VITE_API_URL : '';
+const host = import.meta.env.VITE_IS_REQUEST_PROXY === 'false' 
+  ? (import.meta.env.VITE_API_URL || '') 
+  : '';
+
+// 开发环境下打印环境变量配置
+if (import.meta.env.DEV) {
+  console.log('请求配置:', {
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    VITE_API_URL_PREFIX: import.meta.env.VITE_API_URL_PREFIX,
+    VITE_IS_REQUEST_PROXY: import.meta.env.VITE_IS_REQUEST_PROXY,
+    host: host,
+  });
+}
 
 // 数据处理
 const transform: AxiosTransform = {
@@ -52,15 +64,36 @@ const transform: AxiosTransform = {
   beforeRequestHook: (config, options) => {
     const { apiUrl, isJoinPrefix, urlPrefix, joinParamsToUrl, formatDate, joinTime = true } = options;
 
-    // 添加接口前缀
-    if (isJoinPrefix && urlPrefix) {
-      config.url = `${urlPrefix}${config.url}`;
+    // 确保 URL 以 / 开头
+    let url = config.url || '';
+    if (!url.startsWith('/')) {
+      url = `/${url}`;
     }
 
-    // 将baseUrl拼接
-    if (apiUrl) {
-      config.url = `${apiUrl}${config.url}`;
+    // 添加接口前缀（在使用代理时，只添加前缀，不添加完整 baseUrl）
+    if (isJoinPrefix && urlPrefix) {
+      const prefix = urlPrefix.endsWith('/') ? urlPrefix.slice(0, -1) : urlPrefix;
+      url = `${prefix}${url}`;
     }
+
+    // 将baseUrl拼接（仅在非代理模式下，且 apiUrl 是有效的字符串时）
+    if (apiUrl && typeof apiUrl === 'string' && apiUrl.trim()) {
+      const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+      url = `${baseUrl}${url}`;
+    }
+
+    // 开发环境下打印 URL 处理信息
+    if (import.meta.env.DEV) {
+      console.log('URL 处理:', {
+        原始URL: config.url,
+        前缀: urlPrefix,
+        是否添加前缀: isJoinPrefix,
+        是否使用代理: !apiUrl,
+        最终URL: url,
+      });
+    }
+
+    config.url = url;
 
     const params = config.params || {};
     const data = config.data || false;
@@ -124,6 +157,19 @@ const transform: AxiosTransform = {
         ? `${authenticationScheme} ${token}`
         : `Bearer ${token}`;
     }
+
+    // 开发环境下打印请求信息，方便调试
+    if (import.meta.env.DEV) {
+      console.log('发起请求:', {
+        url: config.url,
+        method: config.method,
+        baseURL: config.baseURL,
+        fullURL: config.baseURL ? `${config.baseURL}${config.url}` : config.url,
+        data: config.data,
+        params: config.params,
+      });
+    }
+
     return config;
   },
 
@@ -134,7 +180,18 @@ const transform: AxiosTransform = {
 
   // 响应错误处理
   responseInterceptorsCatch: (error: any, instance: AxiosInstance) => {
-    const { response } = error;
+    const { response, config } = error;
+
+    // 打印请求信息，方便调试
+    if (config) {
+      console.error('请求失败:', {
+        url: config.url,
+        method: config.method,
+        baseURL: config.baseURL,
+        fullURL: config.baseURL ? `${config.baseURL}${config.url}` : config.url,
+        error: error.message,
+      });
+    }
 
     // 处理 401 未授权
     if (response && response.status === 401) {
@@ -161,11 +218,11 @@ const transform: AxiosTransform = {
 
     // 处理网络错误
     if (error.code === 'NETWORK_ERROR' || !error.response) {
-      message.error('网络连接失败，请检查网络设置');
+      const url = config?.url || '未知地址';
+      message.error(`网络连接失败，请检查网络设置。请求地址: ${url}`);
       return Promise.reject(error);
     }
 
-    const { config } = error;
     if (!config || !config.requestOptions?.retry) return Promise.reject(error);
 
     config.retryCount = config.retryCount || 0;
@@ -181,7 +238,7 @@ const transform: AxiosTransform = {
     });
 
     config.headers = { ...config.headers, 'Content-Type': ContentTypeEnum.Json };
-    return backoff.then((config) => instance.request(config));
+    return backoff.then((config) => instance.request(config as AxiosRequestConfigRetry));
   },
 };
 
@@ -199,11 +256,11 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
     transform,
     // 配置项
     requestOptions: {
-      // 接口地址
-      apiUrl: host,
+      // 接口地址（确保是字符串，避免 undefined）
+      apiUrl: host || '',
       // 是否自动添加接口前缀
       isJoinPrefix: true,
-      // 接口前缀
+      // 接口前缀（默认 /api）
       urlPrefix: import.meta.env.VITE_API_URL_PREFIX || '/api',
       // 是否返回原生响应头
       isReturnNativeResponse: false,

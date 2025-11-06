@@ -7,32 +7,17 @@
         <h1 class="title">知了小程序管理后台</h1>
       </div>
       <div class="item-container">
-        <a-form
-          :model="formState"
-          :rules="rules"
-          @finish="handleSubmit"
-          class="login-form"
-          layout="vertical"
-        >
+        <a-form :model="formState" :rules="rules" @finish="handleSubmit" class="login-form" layout="vertical">
           <a-form-item name="username">
-            <a-input
-              v-model:value="formState.username"
-              size="large"
-              placeholder="请输入用户名"
-              :prefix-hoverable="false"
-            >
+            <a-input v-model:value="formState.username" size="large" placeholder="请输入用户名" :prefix-hoverable="false">
               <template #prefix>
                 <UserOutlined />
               </template>
             </a-input>
           </a-form-item>
           <a-form-item name="password">
-            <a-input-password
-              v-model:value="formState.password"
-              size="large"
-              placeholder="请输入密码"
-              :prefix-hoverable="false"
-            >
+            <a-input-password v-model:value="formState.password" size="large" placeholder="请输入密码"
+              :prefix-hoverable="false">
               <template #prefix>
                 <LockOutlined />
               </template>
@@ -42,13 +27,7 @@
             <a-checkbox>记住密码</a-checkbox>
           </div>
           <a-form-item class="btn-container">
-            <a-button
-              type="primary"
-              html-type="submit"
-              size="large"
-              :loading="loading"
-              block
-            >
+            <a-button type="primary" html-type="submit" size="large" :loading="loading" block>
               登录
             </a-button>
           </a-form-item>
@@ -62,9 +41,9 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
-// import { message } from 'ant-design-vue';
+import { message } from 'ant-design-vue';
 import { useUserStore } from '@/store/modules/user';
-// import { loginApi } from '@/api/auth';
+import { loginApi } from '@/api/auth';
 import LoginHeader from './components/Header.vue';
 
 const router = useRouter();
@@ -87,33 +66,35 @@ const rules = {
 };
 
 const handleSubmit = async () => {
-  // 临时设置 token 以通过路由守卫检查
-  userStore.setToken('temp-token');
-  
-  // 单纯跳转
-  router.push('/');
-  
-  // 登录请求相关代码已注释
-  // try {
-  //   loading.value = true;
-  //   const response = await loginApi({
-  //     username: formState.username,
-  //     password: formState.password,
-  //   });
-  //   
-  //   // 保存 token 和用户信息
-  //   userStore.setToken(response.token);
-  //   userStore.setUserInfo(response.userInfo);
-  //   
-  //   message.success('登录成功');
-  //   
-  //   // 跳转到首页
-  //   
-  // } catch (error: any) {
-  //   message.error(error?.message || '登录失败，请检查用户名和密码');
-  // } finally {
-  //   loading.value = false;
-  // }
+  try {
+    loading.value = true;
+    const response = await loginApi({
+      username: formState.username,
+      password: formState.password,
+    });
+
+    // 响应拦截器已经返回了 data.data，所以 response 直接就是 { token, user_id, username }
+    console.log('登录响应:', response);
+
+    // 保存 token
+    userStore.setToken(response.token);
+
+    // 转换并保存用户信息：将 API 返回的格式转换为前端需要的格式
+    userStore.setUserInfo({
+      id: String(response.user_id), // user_id 转为字符串 id
+      name: response.username, // username 转为 name
+      avatar: undefined,
+      role: undefined,
+    });
+
+    message.success('登录成功');
+    router.push('/');
+  } catch (error: any) {
+    console.error('登录失败:', error);
+    message.error(error?.message || '登录失败，请检查用户名和密码');
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
