@@ -5,16 +5,15 @@ import { request } from '@/utils/request';
  */
 
 export interface ProductParams {
-  productType: string;
   price: number;
-  validityPeriod: string;
+  days: number;
 }
 
 export interface ProductItem {
   id: number;
-  productType: string;
+  name: string;
   price: number;
-  validityPeriod: string;
+  days: number;
 }
 
 /**
