@@ -78,7 +78,7 @@ const handleSubmit = async () => {
 
     // 从 response.data 中获取实际的登录数据
     const loginData = (response as any).data || response;
-    userStore.setToken(loginData.data.token);
+    userStore.setToken(loginData.token);
 
     // 转换并保存用户信息：将 API 返回的格式转换为前端需要的格式
     userStore.setUserInfo({

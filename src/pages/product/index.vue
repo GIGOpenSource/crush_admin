@@ -174,23 +174,7 @@ const loadData = async () => {
   loading.value = true;
   try {
     const response = await getProductListApi();
-    console.log(response,'responsev')
-    // 响应拦截器返回的是完整的 data 对象，包含 { code, message, data: [...] }
-    // 从 response.data 中获取实际的商品列表数据
-    if (response && typeof response === 'object' && 'data' in response) {
-      const listData = (response as any).data;
-      if (Array.isArray(listData)) {
-        dataSource.value = listData;
-      } else {
-        dataSource.value = [];
-      }
-    } else if (Array.isArray(response)) {
-      // 兼容直接返回数组的情况
-      dataSource.value = response;
-    } else {
-      dataSource.value = [];
-    }
-    console.log('商品列表数据:', dataSource.value);
+    // dataSource.value = response
     paginationConfig.total = dataSource.value.length;
   } catch (error: any) {
     console.error('获取商品列表失败:', error);
