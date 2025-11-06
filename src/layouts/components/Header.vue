@@ -19,15 +19,15 @@
         </a>
         <template #overlay>
           <a-menu>
-            <a-menu-item key="profile">
+            <!-- <a-menu-item key="profile">
               <UserOutlined />
               个人中心
             </a-menu-item>
             <a-menu-item key="settings">
               <SettingOutlined />
               设置
-            </a-menu-item>
-            <a-menu-divider />
+            </a-menu-item> -->
+            <!-- <a-menu-divider /> -->
             <a-menu-item key="logout" @click="handleLogout">
               <LogoutOutlined />
               退出登录
