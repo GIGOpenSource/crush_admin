@@ -159,6 +159,11 @@ const transform: AxiosTransform = {
         : `${token}`;
     }
 
+    // 如果是 FormData，删除 Content-Type，让浏览器自动设置（包括 boundary）
+    if (config.data instanceof FormData) {
+      delete (config.headers as Recordable)['Content-Type'];
+    }
+
     // 开发环境下打印请求信息，方便调试
     if (import.meta.env.DEV) {
       console.log('发起请求:', {
