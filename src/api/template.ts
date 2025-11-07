@@ -4,6 +4,13 @@ import { request } from '@/utils/request';
  * 模板管理接口
  */
 
+export interface TemplateImageDetail {
+  id: number;
+  name: string;
+  image_url: string;
+  upload_time?: string;
+}
+
 export interface TemplateItem {
   id: number;
   name: string;
@@ -12,6 +19,7 @@ export interface TemplateItem {
   min_score?: number; // 模板分数最小值
   max_score?: number; // 模板分数最大值
   image_ids?: number[]; // 模板图片ID数组
+  images_detail?: TemplateImageDetail[]; // 模板图片详情数组
   is_active: boolean; // 是否启用
   created_time?: string;
   updated_time?: string;

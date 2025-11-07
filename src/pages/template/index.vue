@@ -476,7 +476,29 @@ const handleEdit = async (record: TemplateItem) => {
     formState.image_ids = detail.image_ids || [];
     formState.is_active = detail.is_active;
 
-    await populateImageFileList(detail.image_ids || []);
+    // 优先使用 images_detail 中的 image_url 进行回显
+    if (detail.images_detail && detail.images_detail.length > 0) {
+      // 从 images_detail 中提取图片ID
+      const imageIds = detail.images_detail.map((img) => img.id).filter((id) => id !== undefined);
+      formState.image_ids = imageIds;
+      
+      imageFileList.value = detail.images_detail.map((img, index) => ({
+        uid: `selected-${img.id}-${index}`,
+        imageId: img.id,
+        url: img.image_url || defaultImagePlaceholder,
+      }));
+      // 同步更新 templateImageMap
+      detail.images_detail.forEach((img) => {
+        if (img.id !== undefined && img.image_url) {
+          templateImageMap.value[img.id] = img.image_url;
+        }
+      });
+      // 同步更新 imagePickerSelectedIds，确保打开弹窗时显示选中状态
+      imagePickerSelectedIds.value = [...imageIds];
+    } else {
+      // 如果没有 images_detail，使用原来的逻辑
+      await populateImageFileList(detail.image_ids || []);
+    }
   } catch (error: any) {
     console.error('获取模板详情失败:', error);
     message.error(error?.message || '获取模板详情失败');
