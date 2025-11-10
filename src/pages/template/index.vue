@@ -37,6 +37,9 @@
                 {{ record.is_active ? '启用' : '禁用' }}
               </a-tag>
             </template>
+            <template v-else-if="column.key === 'created_time'">
+              <span>{{ formatDateTime(record.created_time) }}</span>
+            </template>
             <template v-else-if="column.key === 'action'">
               <a-space>
                 <a-button type="link" size="small" @click="handleEdit(record)">编辑</a-button>
@@ -400,6 +403,22 @@ const populateImageFileList = async (imageIds: number[] = []) => {
     url: templateImageMap.value[id] || defaultImagePlaceholder,
   }));
   imagePickerSelectedIds.value = [...imageIds];
+};
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) return '--';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  const pad = (num: number) => String(num).padStart(2, '0');
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
 const paginationConfig = reactive({

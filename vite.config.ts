@@ -37,8 +37,8 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_URL || 'http://localhost:8000',
           changeOrigin: true,
           rewrite: (path) => {
-            // 移除 /api 前缀，转发到后端服务器
-            const newPath = path.replace(/^\/api/, '');
+            // 避免出现 /api/api 的重复前缀，仅在出现重复时裁剪
+            const newPath = path.replace(/^\/api\/api/, '/api');
             console.log(`代理请求: ${path} -> ${env.VITE_API_URL || 'http://localhost:8000'}${newPath}`);
             return newPath;
           },

@@ -73,8 +73,15 @@ const transform: AxiosTransform = {
 
     // 添加接口前缀（在使用代理时，只添加前缀，不添加完整 baseUrl）
     if (isJoinPrefix && urlPrefix) {
-      const prefix = urlPrefix.endsWith('/') ? urlPrefix.slice(0, -1) : urlPrefix;
-      url = `${prefix}${url}`;
+      let prefix = urlPrefix.endsWith('/') ? urlPrefix.slice(0, -1) : urlPrefix;
+      if (!prefix.startsWith('/')) {
+        prefix = `/${prefix}`;
+      }
+
+      // 仅当当前 URL 未以该前缀开头时才拼接，避免重复出现 /api/api
+      if (!(url === prefix || url.startsWith(`${prefix}/`))) {
+        url = `${prefix}${url}`;
+      }
     }
 
     // 将baseUrl拼接（仅在非代理模式下，且 apiUrl 是有效的字符串时）
