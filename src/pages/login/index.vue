@@ -1,10 +1,10 @@
 <template>
   <div class="login-wrapper">
-    <LoginHeader />
+    <!-- <LoginHeader /> -->
     <div class="login-container">
       <div class="title-container">
-        <h1 class="title margin-no">欢迎登录</h1>
-        <h1 class="title">知了小程序管理后台</h1>
+        <h1 class="title margin-no">登录</h1>
+        <div class="title title1">输入您的用户名和密码以登录！</div>
       </div>
       <div class="item-container">
         <a-form :model="formState" :rules="rules" @finish="handleSubmit" class="login-form" layout="vertical">
@@ -24,10 +24,10 @@
             </a-input-password>
           </a-form-item>
           <div class="check-container remember-pwd">
-            <a-checkbox>记住密码</a-checkbox>
+            <a-checkbox>保持我的登录状态</a-checkbox>
           </div>
           <a-form-item class="btn-container">
-            <a-button type="primary" html-type="submit" size="large" :loading="loading" block>
+            <a-button  html-type="submit" size="large" :loading="loading" block class="custom-login-btn">
               登录
             </a-button>
           </a-form-item>
