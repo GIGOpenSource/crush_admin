@@ -31,23 +31,30 @@
           row-key="id"
         >
           <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'created_at'">
+              {{ formatDateTime(record.created_at) }}
+            </template>
             <template v-if="column.key === 'membershipStatus'">
-              <a-tag
-                :color="
-                  record.membershipStatus === 'member' ? 'green' : 'default'
-                "
-              >
-                {{ record.membershipStatus === "member" ? "会员" : "非会员" }}
+              <a-tag :color="record.is_vip ? 'green' : 'default'">
+                {{ record.is_vip ? "会员" : "非会员" }}
               </a-tag>
+            </template>
+            <template v-if="column.key === 'vip_expire_date'">
+              {{
+                record.vip_expire_date
+                  ? formatDateTime(record.vip_expire_date)
+                  : "-"
+              }}
             </template>
             <template v-if="column.key === 'action'">
               <a-space>
                 <a-button
                   type="link"
                   size="small"
+                  :danger="record.status !== 1"
                   @click="handleFreeze(record)"
                 >
-                  {{ record.isFrozen ? "解冻" : "冻结" }}
+                  {{ record.status === 1 ? "解冻" : "冻结" }}
                 </a-button>
                 <a-button type="link" size="small" @click="handleEdit(record)"
                   >编辑</a-button
@@ -64,6 +71,18 @@
         </a-table>
       </div>
     </a-card>
+    <!-- 编辑用户弹窗 -->
+    <EditUserModal
+      v-model:open="editModalVisible"
+      :user-data="currentEditUser"
+      @success="handleEditSuccess"
+    />
+    <!-- 查看记录弹窗 -->
+    <ViewRecordsModal
+      v-model:open="viewRecordsModalVisible"
+      :wx-id="currentViewRecordsUserId"
+      :user-name="currentViewRecordsUserName"
+    />
   </div>
 </template>
 
@@ -72,43 +91,52 @@ import { ref, reactive, onMounted } from "vue";
 import { message, Modal } from "ant-design-vue";
 import { SearchOutlined } from "@ant-design/icons-vue";
 import type { TableColumnsType } from "ant-design-vue";
-import {
-  getUserListApi,
-  freezeUserApi,
-  getUserRecordsApi,
-  type UserItem,
-} from "@/api/user";
+import { getUserListApi, freezeUserApi, type UserItem } from "@/api/user";
+import EditUserModal from "./components/EditUserModal.vue";
+import ViewRecordsModal from "./components/ViewRecordsModal.vue";
 
 const loading = ref(false);
 const dataSource = ref<UserItem[]>([]);
 const searchKeyword = ref("");
+const editModalVisible = ref(false);
+const currentEditUser = ref<UserItem | null>(null);
+const viewRecordsModalVisible = ref(false);
+const currentViewRecordsUserId = ref<number | null>(null);
+const currentViewRecordsUserName = ref<string>("");
 
 const columns: TableColumnsType = [
   {
     title: "ID",
     dataIndex: "id",
     key: "id",
-    width: 200,
+    width: 80,
   },
   {
     title: "昵称",
-    dataIndex: "nickname",
-    key: "nickname",
+    dataIndex: "username",
+    key: "username",
   },
   {
     title: "注册时间",
-    dataIndex: "registerTime",
-    key: "registerTime",
+    dataIndex: "created_at",
+    key: "created_at",
   },
   {
     title: "会员状态",
-    dataIndex: "membershipStatus",
+    dataIndex: "is_vip",
     key: "membershipStatus",
+  },
+  {
+    title: "会员到期日",
+    dataIndex: "vip_expire_date",
+    key: "vip_expire_date",
+    width: 180,
   },
   {
     title: "操作",
     key: "action",
     fixed: "right",
+    width: 220,
   },
 ];
 
@@ -131,6 +159,18 @@ const handleSearch = () => {
   loadData();
 };
 
+// 格式化日期时间
+const formatDateTime = (dateTimeStr: string) => {
+  if (!dateTimeStr) return "";
+  const date = new Date(dateTimeStr);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+};
+
 // 加载数据
 const loadData = async () => {
   try {
@@ -138,11 +178,12 @@ const loadData = async () => {
     const params = {
       currentPage: paginationConfig.current,
       pageSize: paginationConfig.pageSize,
-      keyword: searchKeyword.value || undefined,
+      search: searchKeyword.value || undefined,
     };
     const res = await getUserListApi(params);
-    dataSource.value = res.list || [];
-    paginationConfig.total = res.total || 0;
+    dataSource.value = res.data.results || [];
+    paginationConfig.total =
+      res.data.pagination.count || res.data.pagination.total || 0;
   } catch (error) {
     console.error("加载用户列表失败:", error);
     message.error("加载用户列表失败");
@@ -153,13 +194,17 @@ const loadData = async () => {
 
 // 冻结/解冻用户
 const handleFreeze = (record: UserItem) => {
-  const action = record.isFrozen ? "解冻" : "冻结";
+  const isFrozen = record.status === 1; // 1-冻结状态
+  const action = isFrozen ? "解冻" : "冻结";
+  const status = isFrozen ? 0 : 1; // 如果已冻结则解冻(0)，否则冻结(1)
+
   Modal.confirm({
     title: `确认${action}用户`,
-    content: `确定要${action}用户 "${record.nickname}" 吗？`,
+    content: `确定要${action}用户 "${record.username}" 吗？`,
     onOk: async () => {
       try {
-        await freezeUserApi(record.id, !record.isFrozen);
+        // wx_id 使用 id
+        await freezeUserApi(record.id, status as 0 | 1);
         message.success(`${action}成功`);
         loadData();
       } catch (error) {
@@ -172,21 +217,20 @@ const handleFreeze = (record: UserItem) => {
 
 // 编辑用户
 const handleEdit = (record: UserItem) => {
-  message.info(`编辑用户: ${record.nickname}`);
-  // TODO: 实现编辑功能，打开编辑弹窗
+  currentEditUser.value = record;
+  editModalVisible.value = true;
+};
+
+// 编辑成功后的回调
+const handleEditSuccess = () => {
+  loadData();
 };
 
 // 查看记录
-const handleViewRecords = async (record: UserItem) => {
-  try {
-    const res = await getUserRecordsApi(record.id);
-    message.info(`查看用户 "${record.nickname}" 的记录`);
-    // TODO: 实现查看记录功能，打开记录弹窗或跳转到记录页面
-    console.log("用户记录:", res);
-  } catch (error) {
-    console.error("获取用户记录失败:", error);
-    message.error("获取用户记录失败");
-  }
+const handleViewRecords = (record: UserItem) => {
+  currentViewRecordsUserId.value = record.id;
+  currentViewRecordsUserName.value = record.username;
+  viewRecordsModalVisible.value = true;
 };
 
 onMounted(() => {
