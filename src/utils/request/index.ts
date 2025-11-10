@@ -49,7 +49,8 @@ const transform: AxiosTransform = {
     const { code } = data;
 
     // 这里逻辑可以根据项目进行修改
-    const hasSuccess = data && code === 200;
+    const hasSuccess =
+      data && (code === undefined || code === null || code === 200 || code === 201);
     if (hasSuccess) {
       // 返回 data 对象中的所有数据，而不仅仅是 data.data
       return data;
@@ -153,17 +154,14 @@ const transform: AxiosTransform = {
   },
 
   // 请求拦截器处理
-  requestInterceptors: (config, options) => {
+  requestInterceptors: (config, _options) => {
     // 请求之前处理config
     const userStore = useUserStore();
     const { token } = userStore;
 
     if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
-      // jwt token
-      const authenticationScheme = options.authenticationScheme || '';
-      (config.headers as Recordable).Authorization = authenticationScheme
-        ? `${token}`
-        : `${token}`;
+      // 使用 token 作为请求头
+      (config.headers as Recordable).token = token;
     }
 
     // 如果是 FormData，删除 Content-Type，让浏览器自动设置（包括 boundary）
@@ -211,7 +209,7 @@ const transform: AxiosTransform = {
       const userStore = useUserStore();
       userStore.logout();
       message.error('登录已过期，请重新登录');
-      window.location.href = '/login';
+      // window.location.href = '/login';
       return Promise.reject(error);
     }
 

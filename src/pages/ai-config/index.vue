@@ -24,9 +24,14 @@
                 1
               }}
             </template>
-            <template v-if="column.key === 'status'">
-              <a-tag :color="record.status === 1 ? 'green' : 'default'">
-                {{ record.status === 1 ? "开启" : "关闭" }}
+            <template v-if="column.key === 'enabled'">
+              <a-tag :color="record.enabled ? 'green' : 'default'">
+                {{ record.enabled ? "开启" : "关闭" }}
+              </a-tag>
+            </template>
+            <template v-if="column.key === 'is_default'">
+              <a-tag :color="record.is_default ? 'blue' : 'default'">
+                {{ record.is_default ? "默认" : "-" }}
               </a-tag>
             </template>
             <template v-if="column.key === 'created_at'">
@@ -67,15 +72,15 @@
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-item label="模型名称" name="name">
+        <a-form-item label="名称" name="name">
           <a-input
             v-model:value="formState.name"
             placeholder="请输入平台名称"
           />
         </a-form-item>
-        <a-form-item label="模型地址" name="address">
+        <a-form-item label="模型地址" name="base_url">
           <a-input
-            v-model:value="formState.address"
+            v-model:value="formState.base_url"
             placeholder="请输入平台地址"
           />
         </a-form-item>
@@ -85,11 +90,12 @@
             placeholder="请输入平台apikey"
           />
         </a-form-item>
-        <a-form-item label="状态" name="status">
-          <a-select v-model:value="formState.status" placeholder="请选择状态">
-            <a-select-option :value="1">开启</a-select-option>
-            <a-select-option :value="0">关闭</a-select-option>
-          </a-select>
+        <a-form-item label="状态" name="enabled">
+          <a-select
+            v-model:value="formState.enabled"
+            placeholder="请选择状态"
+            :options="statusOptions"
+          />
         </a-form-item>
         <a-form-item label="优先级" name="priority">
           <a-input-number
@@ -108,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, nextTick } from "vue";
 import { message, Modal } from "ant-design-vue";
 import type { TableColumnsType, FormInstance } from "ant-design-vue";
 import {
@@ -129,17 +135,42 @@ const formRef = ref<FormInstance>();
 
 const formState = reactive({
   name: "",
-  address: "",
+  provider: "",
+  model: "",
   api_key: "",
-  status: 1,
+  base_url: "",
+  region: "",
+  api_version: "",
+  organization_id: "",
+  email: "",
+  enabled: true,
+  is_default: false,
   priority: 0,
 });
 
+const statusOptions = [
+  { label: "开启", value: true },
+  { label: "关闭", value: false },
+];
+
 const rules = {
-  name: [{ required: true, message: "请输入模型名称", trigger: "blur" }],
-  address: [{ required: true, message: "请输入模型地址", trigger: "blur" }],
-  api_key: [{ required: true, message: "请输入模型apikey", trigger: "blur" }],
-  status: [{ required: true, message: "请选择状态", trigger: "change" }],
+  name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+  api_key: [{ required: true, message: "请输入 API Key", trigger: "blur" }],
+  base_url: [
+    { required: true, message: "请输入模型地址", trigger: "blur" },
+    {
+      validator: (_rule: any, value: string) => {
+        if (!value) {
+          return Promise.reject("请输入模型地址");
+        }
+        if (!/^https?:\/\//i.test(value)) {
+          return Promise.reject("模型地址必须以 http:// 或 https:// 开头");
+        }
+        return Promise.resolve();
+      },
+      trigger: "blur",
+    },
+  ],
   priority: [{ required: true, message: "请输入优先级", trigger: "blur" }],
 };
 
@@ -155,9 +186,10 @@ const columns: TableColumnsType = [
     key: "name",
   },
   {
-    title: "状态",
-    dataIndex: "status",
-    key: "status",
+    title: "启用",
+    dataIndex: "enabled",
+    key: "enabled",
+    width: 100,
   },
   {
     title: "优先级",
@@ -223,11 +255,13 @@ const loadData = async () => {
 };
 
 // 新增
-const handleAdd = () => {
+const handleAdd = async () => {
   isEdit.value = false;
   currentEditId.value = null;
   resetForm();
   modalVisible.value = true;
+  await nextTick();
+  formRef.value?.resetFields();
 };
 
 // 编辑
@@ -235,9 +269,16 @@ const handleEdit = (record: AIModelItem) => {
   isEdit.value = true;
   currentEditId.value = record.id;
   formState.name = record.name;
-  formState.address = record.address;
+  formState.provider = record.provider;
+  formState.model = record.model;
   formState.api_key = record.api_key;
-  formState.status = record.status;
+  formState.base_url = record.base_url;
+  formState.region = record.region;
+  formState.api_version = record.api_version;
+  formState.organization_id = record.organization_id;
+  formState.email = record.email || "";
+  formState.enabled = record.enabled;
+  formState.is_default = record.is_default;
   formState.priority = record.priority;
   modalVisible.value = true;
 };
@@ -268,9 +309,16 @@ const handleSubmit = async () => {
 
     const submitData = {
       name: formState.name,
-      address: formState.address,
+      provider: formState.provider,
+      model: formState.model,
       api_key: formState.api_key,
-      status: formState.status,
+      base_url: formState.base_url,
+      region: formState.region || undefined,
+      api_version: formState.api_version || undefined,
+      organization_id: formState.organization_id || undefined,
+      email: formState.email || undefined,
+      enabled: formState.enabled,
+      is_default: formState.is_default,
       priority: formState.priority,
     };
 
@@ -305,9 +353,16 @@ const handleCancel = () => {
 // 重置表单
 const resetForm = () => {
   formState.name = "";
-  formState.address = "";
+  formState.provider = "";
+  formState.model = "";
   formState.api_key = "";
-  formState.status = 1;
+  formState.base_url = "";
+  formState.region = "";
+  formState.api_version = "";
+  formState.organization_id = "";
+  formState.email = "";
+  formState.enabled = true;
+  formState.is_default = false;
   formState.priority = 0;
   formRef.value?.resetFields();
 };

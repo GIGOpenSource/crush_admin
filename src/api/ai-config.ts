@@ -6,12 +6,21 @@ import { request } from '@/utils/request';
 
 export interface AIModelItem {
   id: number;
-  name: string; // 模型名称
-  address: string; // 模型地址
-  api_key: string; // 模型apikey
-  status: number; // 状态：1-开启, 0-关闭
-  priority: number; // 优先级
-  created_at: string; // 创建时间
+  email: string;
+  name: string;
+  provider: string;
+  model: string;
+  enabled: boolean;
+  is_default: boolean;
+  priority: number;
+  api_key: string;
+  base_url: string;
+  region: string;
+  api_version: string;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
+  user: number;
 }
 
 export interface AIModelListParams {
@@ -37,20 +46,26 @@ export interface AIModelListResponse {
 
 export interface CreateAIModelParams {
   name: string;
-  address: string;
+  provider: string;
+  model: string;
   api_key: string;
-  status: number;
+  base_url: string;
+  region?: string;
+  api_version?: string;
+  organization_id?: string;
+  enabled: boolean;
+  is_default: boolean;
   priority: number;
+  email?: string;
 }
 
-export interface UpdateAIModelParams extends CreateAIModelParams {
-  id: number;
-}
+export interface UpdateAIModelParams extends Partial<CreateAIModelParams> {}
 
 /**
  * 获取AI模型列表
  */
 const API_PREFIX = '/api/aiconfig/';
+const CREATE_API = '/api/aiconfig/';
 
 export const getAIModelListApi = (params?: AIModelListParams) => {
   return request.get<AIModelListResponse>({ url: API_PREFIX, params });
@@ -60,13 +75,13 @@ export const getAIModelListApi = (params?: AIModelListParams) => {
  * 创建AI模型
  */
 export const createAIModelApi = (data: CreateAIModelParams) => {
-  return request.post({ url: API_PREFIX, data });
+  return request.post({ url: CREATE_API, data });
 };
 
 /**
  * 更新AI模型
  */
-export const updateAIModelApi = (id: number, data: Partial<CreateAIModelParams>) => {
+export const updateAIModelApi = (id: number, data: UpdateAIModelParams) => {
   return request.put({ url: `${API_PREFIX}${id}/`, data });
 };
 
