@@ -15,7 +15,7 @@ export interface TemplateImageItem {
 
 // uploadImg 接口返回的数据结构
 export interface UploadResponse {
-  data?: number[] | { files?: number[]; ids?: number[] };
+  data?: number[] | { file?:string; file_name?:string,type:string };
 }
 
 /**

@@ -70,6 +70,15 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'ShoppingOutlined',
         },
       },
+      {
+        path: '/guide',
+        name: 'Guide',
+        component: () => import('@/pages/guide/index.vue'),
+        meta: {
+          title: '新手引导',
+          icon: 'QuestionCircleOutlined',
+        },
+      },
     ],
   },
 ];
