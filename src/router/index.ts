@@ -67,7 +67,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/pages/prompt/index.vue'),
         meta: {
           title: '提示词管理',
-          icon: 'FileTextOutlined',
+          icon: 'RedditOutlined',
         },
       },
       {
