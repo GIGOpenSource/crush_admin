@@ -62,6 +62,15 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
+        path:"/prompt",
+        name: 'Prompt',
+        component: () => import('@/pages/prompt/index.vue'),
+        meta: {
+          title: '提示词管理',
+          icon: 'FileTextOutlined',
+        },
+      },
+      {
         path: '/product',
         name: 'Product',
         component: () => import('@/pages/product/index.vue'),
