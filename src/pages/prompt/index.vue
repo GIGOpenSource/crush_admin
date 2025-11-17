@@ -93,6 +93,7 @@ import {message} from 'ant-design-vue';
 import type {TableColumnsType} from 'ant-design-vue';
 import type {FormInstance} from 'ant-design-vue';
 import {PlusOutlined } from '@ant-design/icons-vue';
+import dayjs from 'dayjs'
 import {getPromptListApi, createPromptApi, type PromptItem, updatePromptApi, deletePromptApi} from '@/api/prompt';
 
 const loading = ref(false);
@@ -201,13 +202,13 @@ const columns: TableColumnsType = [
     title: "创建时间",
     dataIndex: 'created_time',
     key: 'created_time',
-    // width:100
+    customRender: ({text}) => dayjs(text).format('YYYY-MM-DD HH:mm:ss'),
   },
   {
     title: "更新时间",
     dataIndex: 'updated_time',
     key: 'updated_time',
-    // width:100
+    customRender: ({text}) => dayjs(text).format('YYYY-MM-DD HH:mm:ss'),
   },
   {
     title: '操作',
