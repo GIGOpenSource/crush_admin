@@ -1,0 +1,22 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "welcome": "Welcome to the system"
+  },
+  "login": {
+    "title": "User Login",
+    "username": "Username",
+    "password": "Password",
+    "loginBtn": "Login",
+    "registerBtn": "Register",
+    "emptyError": "Username and password cannot be empty",
+    "userNotFound": "Username does not exist",
+    "pwdError": "Incorrect username or password"
+  },
+  "user": {
+    "list": "User List",
+    "detail": "User Detail",
+    "logoutSuccess": "Logout successful, Token has been invalidated"
+  }
+}

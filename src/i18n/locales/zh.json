@@ -1,0 +1,22 @@
+{
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "welcome": "欢迎访问系统"
+  },
+  "login": {
+    "title": "用户登录",
+    "username": "用户名",
+    "password": "密码",
+    "loginBtn": "登录",
+    "registerBtn": "注册",
+    "emptyError": "用户名和密码不能为空",
+    "userNotFound": "用户名不存在",
+    "pwdError": "用户名或密码错误"
+  },
+  "user": {
+    "list": "用户列表",
+    "detail": "用户详情",
+    "logoutSuccess": "登出成功，Token已失效"
+  }
+}

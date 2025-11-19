@@ -1,0 +1,22 @@
+{
+  "common": {
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "welcome": "システムへようこそ"
+  },
+  "login": {
+    "title": "ユーザーログイン",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "loginBtn": "ログイン",
+    "registerBtn": "登録",
+    "emptyError": "ユーザー名とパスワードは空にできません",
+    "userNotFound": "ユーザー名が存在しません",
+    "pwdError": "ユーザー名またはパスワードが間違っています"
+  },
+  "user": {
+    "list": "ユーザーリスト",
+    "detail": "ユーザー詳細",
+    "logoutSuccess": "ログアウト成功、トークンは無効になりました"
+  }
+}
