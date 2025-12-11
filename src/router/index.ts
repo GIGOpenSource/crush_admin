@@ -120,6 +120,15 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'TeamOutlined',
         },
       },
+      {
+        path: '/advertisement',
+        name: 'Advertisement',
+        component: () => import('@/pages/advertisement/index.vue'),
+        meta: {
+          title: '广告管理',
+          icon: 'FileImageOutlined',
+        },
+      },
     ],
   },
 ];
