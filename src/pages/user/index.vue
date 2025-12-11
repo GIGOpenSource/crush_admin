@@ -17,6 +17,19 @@
             <SearchOutlined />
           </template>
         </a-input>
+        <a-select
+          v-model:value="selectedPlatform"
+          placeholder="选择平台"
+          allow-clear
+          style="width: 150px; margin-left: 8px"
+        >
+          <a-select-option value="">全部</a-select-option>
+          <a-select-option value="微信">微信</a-select-option>
+          <a-select-option value="抖音">抖音</a-select-option>
+          <a-select-option value="小红书">小红书</a-select-option>
+          <a-select-option value="APP">APP</a-select-option>
+          <a-select-option value="APP（海外）">APP（海外）</a-select-option>
+        </a-select>
         <a-button type="primary" @click="handleSearch" style="margin-left: 8px">
           搜索
         </a-button>
@@ -98,6 +111,7 @@ import ViewRecordsModal from "./components/ViewRecordsModal.vue";
 const loading = ref(false);
 const dataSource = ref<UserItem[]>([]);
 const searchKeyword = ref("");
+const selectedPlatform = ref<string>("");
 const editModalVisible = ref(false);
 const currentEditUser = ref<UserItem | null>(null);
 const viewRecordsModalVisible = ref(false);
@@ -120,6 +134,11 @@ const columns: TableColumnsType = [
     title: "注册时间",
     dataIndex: "created_at",
     key: "created_at",
+  },
+  {
+    title: "平台",
+    dataIndex: "platform",
+    key: "platform",
   },
   {
     title: "会员状态",
@@ -175,11 +194,15 @@ const formatDateTime = (dateTimeStr: string) => {
 const loadData = async () => {
   try {
     loading.value = true;
-    const params = {
+    const params: any = {
       currentPage: paginationConfig.current,
       pageSize: paginationConfig.pageSize,
       search: searchKeyword.value || undefined,
     };
+    // 如果选择了平台，添加平台参数
+    if (selectedPlatform.value) {
+      params.platform = selectedPlatform.value;
+    }
     const res = await getUserListApi(params);
     dataSource.value = res.data.results || [];
     paginationConfig.total =

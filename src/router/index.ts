@@ -25,6 +25,7 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'UserOutlined',
         },
       },
+     
       {
         path: '/order',
         name: 'Order',
@@ -35,40 +36,71 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: '/ai-config',
-        name: 'AIConfig',
-        component: () => import('@/pages/ai-config/index.vue'),
+        path: '/ai-config-group',
+        component: () => import('@/layouts/components/RouterView.vue'),
+        redirect: '/ai-config',
         meta: {
           title: 'AI配置',
           icon: 'SettingOutlined',
         },
+        children: [
+          {
+            path: '/ai-config',
+            name: 'AIConfig',
+            component: () => import('@/pages/ai-config/index.vue'),
+            meta: {
+              title: 'AI配置',
+              icon: 'SettingOutlined',
+            },
+          },
+          {
+            path: '/prompt',
+            name: 'Prompt',
+            component: () => import('@/pages/prompt/index.vue'),
+            meta: {
+              title: '提示词管理',
+              icon: 'RedditOutlined',
+            },
+          },
+          {
+            path: '/guide',
+            name: 'Guide',
+            component: () => import('@/pages/guide/index.vue'),
+            meta: {
+              title: '新手引导',
+              icon: 'QuestionCircleOutlined',
+            },
+          },
+        ],
       },
       {
-        path: '/template',
-        name: 'Template',
-        component: () => import('@/pages/template/index.vue'),
+        path: '/template-group',
+        component: () => import('@/layouts/components/RouterView.vue'),
+        redirect: '/template',
         meta: {
           title: '模板管理',
           icon: 'FileTextOutlined',
         },
-      },
-      {
-        path: '/template-library',
-        name: 'TemplateLibrary',
-        component: () => import('@/pages/template-library/index.vue'),
-        meta: {
-          title: '模板库',
-          icon: 'FolderOutlined',
-        },
-      },
-      {
-        path:"/prompt",
-        name: 'Prompt',
-        component: () => import('@/pages/prompt/index.vue'),
-        meta: {
-          title: '提示词管理',
-          icon: 'RedditOutlined',
-        },
+        children: [
+          {
+            path: '/template',
+            name: 'Template',
+            component: () => import('@/pages/template/index.vue'),
+            meta: {
+              title: '模板管理',
+              icon: 'FileTextOutlined',
+            },
+          },
+          {
+            path: '/template-library',
+            name: 'TemplateLibrary',
+            component: () => import('@/pages/template-library/index.vue'),
+            meta: {
+              title: '模板库',
+              icon: 'FolderOutlined',
+            },
+          },
+        ],
       },
       {
         path: '/product',
@@ -80,12 +112,12 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: '/guide',
-        name: 'Guide',
-        component: () => import('@/pages/guide/index.vue'),
+        path: '/invitation',
+        name: 'Invitation',
+        component: () => import('@/pages/invitation/index.vue'),
         meta: {
-          title: '新手引导',
-          icon: 'QuestionCircleOutlined',
+          title: '邀请管理',
+          icon: 'TeamOutlined',
         },
       },
     ],

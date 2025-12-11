@@ -26,6 +26,8 @@ export interface UserListParams {
   currentPage?: number;
   pageSize?: number;
   keyword?: string; // 搜索关键词（用户ID、昵称）
+  search?: string; // 搜索关键词（用户ID、昵称）
+  platform?: string; // 平台筛选：全部、微信、抖音、小红书、APP、APP（海外）
 }
 
 export interface PaginationInfo {
