@@ -20,6 +20,7 @@ export interface UserItem {
   vip_expire_date: string | null;
   created_at: string; // 注册时间
   status?: number; // 用户状态：1-冻结, 2-正常（解冻）
+  platform?: string; // 平台类型：xhs_mini-小红书, fbook_mini-feekbook, ins_mini-ins, google_mini-googole, ios_mini-苹果, apk_mini-安卓, wechat_mini-微信, douyin_mini-抖音, mock_mini-苹果
 }
 
 export interface UserListParams {
@@ -27,7 +28,7 @@ export interface UserListParams {
   pageSize?: number;
   keyword?: string; // 搜索关键词（用户ID、昵称）
   search?: string; // 搜索关键词（用户ID、昵称）
-  platform?: string; // 平台筛选：全部、微信、抖音、小红书、APP、APP（海外）
+  platform?: string; // 平台筛选：xhs_mini, fbook_mini, ins_mini, google_mini, ios_mini, apk_mini, wechat_mini, douyin_mini, mock_mini
 }
 
 export interface PaginationInfo {

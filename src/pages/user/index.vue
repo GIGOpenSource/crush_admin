@@ -19,16 +19,20 @@
         </a-input>
         <a-select
           v-model:value="selectedPlatform"
-          placeholder="选择平台"
+          placeholder="全部平台"
           allow-clear
           style="width: 150px; margin-left: 8px"
         >
-          <a-select-option value="">全部</a-select-option>
-          <a-select-option value="微信">微信</a-select-option>
-          <a-select-option value="抖音">抖音</a-select-option>
-          <a-select-option value="小红书">小红书</a-select-option>
-          <a-select-option value="APP">APP</a-select-option>
-          <a-select-option value="APP（海外）">APP（海外）</a-select-option>
+          <a-select-option value="">全部平台</a-select-option>
+          <a-select-option value="xhs_mini">小红书</a-select-option>
+          <a-select-option value="fbook_mini">feekbook</a-select-option>
+          <a-select-option value="ins_mini">ins</a-select-option>
+          <a-select-option value="google_mini">googole</a-select-option>
+          <a-select-option value="ios_mini">苹果</a-select-option>
+          <a-select-option value="apk_mini">安卓</a-select-option>
+          <a-select-option value="wechat_mini">微信</a-select-option>
+          <a-select-option value="douyin_mini">抖音</a-select-option>
+          <a-select-option value="mock_mini">苹果</a-select-option>
         </a-select>
         <a-button type="primary" @click="handleSearch" style="margin-left: 8px">
           搜索
@@ -46,6 +50,9 @@
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'created_at'">
               {{ formatDateTime(record.created_at) }}
+            </template>
+            <template v-if="column.key === 'platform'">
+              {{ getPlatformLabel(record.platform) }}
             </template>
             <template v-if="column.key === 'membershipStatus'">
               <a-tag :color="record.is_vip ? 'green' : 'default'">
@@ -188,6 +195,25 @@ const formatDateTime = (dateTimeStr: string) => {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day} ${hours}:${minutes}`;
+};
+
+// 平台字段语义化映射
+const getPlatformLabel = (platform: string | undefined): string => {
+  if (!platform) return '-';
+  
+  const platformMap: Record<string, string> = {
+    'xhs_mini': '小红书',
+    'fbook_mini': 'feekbook',
+    'ins_mini': 'ins',
+    'google_mini': 'googole',
+    'ios_mini': '苹果',
+    'apk_mini': '安卓',
+    'wechat_mini': '微信',
+    'douyin_mini': '抖音',
+    'mock_mini': '苹果',
+  };
+  
+  return platformMap[platform] || platform;
 };
 
 // 加载数据

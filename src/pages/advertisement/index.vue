@@ -23,13 +23,13 @@
         </a-input>
         <a-select
           v-model:value="selectedStatus"
-          placeholder="全部"
+          placeholder="全部状态"
           allow-clear
           style="width: 120px; margin-left: 8px"
         >
-          <a-select-option value="">全部</a-select-option>
-          <a-select-option value="active">启用</a-select-option>
-          <a-select-option value="inactive">禁用</a-select-option>
+          <a-select-option value="">全部状态</a-select-option>
+          <a-select-option value="pending">待上线</a-select-option>
+          <a-select-option value="active">上线中</a-select-option>
         </a-select>
         <a-button type="primary" @click="handleSearch" style="margin-left: 8px">
           搜索
@@ -58,8 +58,8 @@
             <template v-if="column.key === 'access_token'">
               {{ record.access_token || '-' }}
             </template>
-            <template v-if="column.key === 'location'">
-              {{ record.location || '-' }}
+            <template v-if="column.key === 'positions'">
+              {{ getPositionLabel(record.positions || record.positions) }}
             </template>
             <template v-if="column.key === 'weight'">
               {{ record.weight || '-' }}
@@ -67,8 +67,8 @@
             <template v-if="column.key === 'status'">
               <a-switch
                 v-model:checked="record.status"
-                checked-children="启用"
-                un-checked-children="禁用"
+                checked-children="上线中"
+                un-checked-children="待上线"
                 @change="handleStatusChange(record)"
               />
             </template>
@@ -113,7 +113,7 @@ import { ref, reactive, onMounted } from "vue";
 import { message, Modal } from "ant-design-vue";
 import { SearchOutlined } from "@ant-design/icons-vue";
 import type { TableColumnsType } from "ant-design-vue";
-import { getAdvertisementListApi, deleteAdvertisementApi, updateAdvertisementStatusApi, type AdvertisementItem } from "@/api/advertisement";
+import { getAdvertisementListApi, deleteAdvertisementApi, updateAdvertisementStatusApi, detailsAdvertisementApi, type AdvertisementItem } from "@/api/advertisement";
 import AdvertisementModal from "./components/AdvertisementModal.vue";
 
 const loading = ref(false);
@@ -152,8 +152,8 @@ const columns: TableColumnsType = [
   },
   {
     title: "位置",
-    dataIndex: "location",
-    key: "location",
+    dataIndex: "positions",
+    key: "positions",
   },
   {
     title: "权重",
@@ -212,6 +212,27 @@ const formatDateTime = (dateTimeStr: string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
+// 位置字段语义化映射
+const getPositionLabel = (position: string | undefined): string => {
+  if (!position) return '-';
+  
+  const positionMap: Record<string, string> = {
+    'banner': '首页',
+    'center': '个人中心',
+    'cover': '封面',
+  };
+  
+  // 如果是多个位置用逗号分隔，需要分别转换
+  if (position.includes(',')) {
+    return position.split(',').map(p => {
+      const trimmed = p.trim();
+      return positionMap[trimmed] || trimmed;
+    }).join(', ');
+  }
+  
+  return positionMap[position] || position;
+};
+
 // 加载数据
 const loadData = async () => {
   try {
@@ -219,7 +240,7 @@ const loadData = async () => {
     const params: any = {
       currentPage: paginationConfig.current,
       pageSize: paginationConfig.pageSize,
-      search: searchKeyword.value || undefined,
+      name: searchKeyword.value || undefined,
     };
     
     if (selectedStatus.value) {
@@ -228,9 +249,17 @@ const loadData = async () => {
     
     try {
       const res = await getAdvertisementListApi(params);
-      dataSource.value = res.data.results || [];
       paginationConfig.total =
         res.data.pagination.count || res.data.pagination.total || 0;
+      dataSource.value = res.data.results.map(item => {
+        return {
+          ...item,
+          // 如果 status 是字符串 'pending'，转换为 false，否则转换为 true
+          status: typeof item.status === 'string' 
+            ? (item.status !== 'pending') 
+            : (item.status === true)
+        }
+      })
     } catch (apiError) {
       // API调用失败时使用假数据
       console.warn("API调用失败，使用假数据:", apiError);
@@ -251,7 +280,7 @@ const loadData = async () => {
         });
       }
       
-      dataSource.value = filteredData;
+     
       paginationConfig.total = filteredData.length;
     }
   } catch (error) {
@@ -271,7 +300,7 @@ const generateMockData = (): AdvertisementItem[] => {
       api_key: "",
       api_secret: "",
       access_token: "",
-      location: "首页弹窗,个人中心-上",
+      positions: "首页弹窗,个人中心-上",
       weight: 3,
       status: true,
       jump_link: "https://example.com/ad1",
@@ -287,7 +316,7 @@ const generateMockData = (): AdvertisementItem[] => {
       api_key: "",
       api_secret: "",
       access_token: "",
-      location: "首页弹窗,个人中心-下",
+      positions: "首页弹窗,个人中心-下",
       weight: 2,
       status: true,
       jump_link: "https://example.com/ad2",
@@ -305,7 +334,7 @@ const generateMockData = (): AdvertisementItem[] => {
       api_key: "",
       api_secret: "",
       access_token: "",
-      location: "首页弹窗,个人中心-下",
+      positions: "首页弹窗,个人中心-下",
       weight: 4,
       status: true,
       jump_link: "https://example.com/ad3",
@@ -326,17 +355,41 @@ const handleAdd = () => {
 };
 
 // 查看数据
-const handleViewData = (record: AdvertisementItem) => {
-  currentAdvertisement.value = record;
-  modalMode.value = "view";
-  modalVisible.value = true;
+const handleViewData = async (record: AdvertisementItem) => {
+  try {
+    loading.value = true;
+    const res = await detailsAdvertisementApi(record.id);
+    // 根据 request 的处理逻辑，返回的是 res.data（整个 data 对象）
+    // 如果接口返回的是 { data: { ... } }，则取 res.data.data；否则取 res.data
+    const detailData = (res as any)?.data?.data || (res as any)?.data || res;
+    currentAdvertisement.value = detailData as AdvertisementItem;
+    modalMode.value = "view";
+    modalVisible.value = true;
+  } catch (error) {
+    console.error("获取广告详情失败:", error);
+    message.error("获取广告详情失败");
+  } finally {
+    loading.value = false;
+  }
 };
 
 // 编辑广告
-const handleEdit = (record: AdvertisementItem) => {
-  currentAdvertisement.value = record;
-  modalMode.value = "edit";
-  modalVisible.value = true;
+const handleEdit = async (record: AdvertisementItem) => {
+  try {
+    loading.value = true;
+    const res = await detailsAdvertisementApi(record.id);
+    // 根据 request 的处理逻辑，返回的是 res.data（整个 data 对象）
+    // 如果接口返回的是 { data: { ... } }，则取 res.data.data；否则取 res.data
+    const detailData = (res as any)?.data?.data || (res as any)?.data || res;
+    currentAdvertisement.value = detailData as AdvertisementItem;
+    modalMode.value = "edit";
+    modalVisible.value = true;
+  } catch (error) {
+    console.error("获取广告详情失败:", error);
+    message.error("获取广告详情失败");
+  } finally {
+    loading.value = false;
+  }
 };
 
 // 弹窗成功回调
@@ -365,13 +418,17 @@ const handleDelete = (record: AdvertisementItem) => {
 // 状态切换
 const handleStatusChange = async (record: AdvertisementItem) => {
   try {
-    await updateAdvertisementStatusApi(record.id, record.status);
-    message.success(record.status ? "已启用" : "已禁用");
+    const newStatus = record.status ? 'active' : 'pending';
+    await updateAdvertisementStatusApi(record.id, newStatus);
+    message.success(record.status? "已启用" : "已禁用");
   } catch (error) {
     console.error("更新状态失败:", error);
     message.error("更新状态失败");
     // 恢复原状态
-    record.status = !record.status;
+    const currentStatus = typeof record.status === 'boolean' 
+      ? record.status 
+      : (record.status === 'active');
+    record.status = (!currentStatus) as any;
   }
 };
 

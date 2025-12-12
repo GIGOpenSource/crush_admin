@@ -111,15 +111,15 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'ShoppingOutlined',
         },
       },
-      {
-        path: '/invitation',
-        name: 'Invitation',
-        component: () => import('@/pages/invitation/index.vue'),
-        meta: {
-          title: '邀请管理',
-          icon: 'TeamOutlined',
-        },
-      },
+      // {
+      //   path: '/invitation',
+      //   name: 'Invitation',
+      //   component: () => import('@/pages/invitation/index.vue'),
+      //   meta: {
+      //     title: '邀请管理',
+      //     icon: 'TeamOutlined',
+      //   },
+      // },
       {
         path: '/advertisement',
         name: 'Advertisement',
