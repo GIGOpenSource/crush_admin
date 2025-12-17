@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <a-card :bordered="false" class="welcome-card">
-      <h1>欢迎使用 知了小程序管理后台</h1>
+      <h1>欢迎使用 CrushCheck管理后台</h1>
       <p>这是一个基于 Vue3 + Ant Design Vue 的后台管理系统模板</p>
     </a-card>
 

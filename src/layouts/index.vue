@@ -9,7 +9,7 @@
       >
         <div class="logo" :style="{ padding: settingStore.collapsed ? '16px 20px' : '16px 24px' }">
           <span v-if="!settingStore.collapsed" style="color: #1890ff; font-weight: bold; font-size: 16px">
-            知了小程序管理后台
+            CrushCheck管理后台
           </span>
           <span v-else style="color: #1890ff; font-weight: bold; font-size: 20px">N</span>
         </div>

@@ -1,6 +1,6 @@
 <template>
   <header class="login-header">
-    <h1>知了小程序管理后台</h1>
+    <h1>CrushCheck管理后台</h1>
     <div class="operations-container">
       <!-- 可以在这里添加其他操作按钮 -->
     </div>
