@@ -129,6 +129,15 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'FileImageOutlined',
         },
       },
+      {
+        path: '/config',
+        name: 'Config',
+        component: () => import('@/pages/config/index.vue'),
+        meta: {
+          title: '配置管理',
+          icon: 'ControlOutlined',
+        },
+      },
     ],
   },
 ];
