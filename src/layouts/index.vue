@@ -8,7 +8,7 @@
         class="layout-sider"
       >
         <div class="logo" :style="{ padding: settingStore.collapsed ? '16px 20px' : '16px 24px' }">
-          <span v-if="!settingStore.collapsed" style="color: #1890ff; font-weight: bold; font-size: 16px">
+          <span v-if="!settingStore.collapsed" style="color: #1890ff; font-weight: bold; font-size: 15px">
             CrushCheck管理后台
           </span>
           <span v-else style="color: #1890ff; font-weight: bold; font-size: 20px">N</span>
