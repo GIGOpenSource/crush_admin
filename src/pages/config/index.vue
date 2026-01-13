@@ -50,15 +50,24 @@
             :maxlength="10000"
           />
         </a-form-item>
+          <a-form-item label="会员服务协议" name="pay_agreement">
+          <a-textarea
+            v-model:value="formState.pay_agreement"
+            placeholder="请输入会员服务协议的内容"
+            :rows="10"
+            show-count
+            :maxlength="10000"
+          />
+        </a-form-item>
         
-        <a-form-item v-if="activePlatform === 'ios'" label="审核模式" name="version">
+        <!-- <a-form-item v-if="activePlatform === 'ios'" label="审核模式" name="version">
           <a-switch
             :checked="versionSwitchValue"
             checked-children="开启"
             un-checked-children="关闭"
             @change="handleVersionChange"
           />
-        </a-form-item>
+        </a-form-item> -->
         
         <a-form-item label="二维码" name="qr_code_url">
           <a-upload
@@ -137,6 +146,7 @@ const formState = reactive<Partial<ConfigItem>>({
   version: '1',
   platform: 'ios', // 添加平台字段
   qr_code_url: '',
+  pay_agreement:''
 });
 
 const rules = {
@@ -148,6 +158,9 @@ const rules = {
   ],
   about_us: [
     { required: true, message: '请输入关于我们的内容', trigger: 'blur' },
+  ],
+  pay_agreement: [
+    { required: false, message: '请输入会员服务协议内容', trigger: 'blur' },
   ],
 };
 
@@ -185,6 +198,7 @@ const loadData = async () => {
     formState.version = config.version || '1';
     formState.id = config.id || '';
     formState.qr_code_url = config.qr_code_url;
+    formState.pay_agreement = config.pay_agreement || '';
     
     // 设置二维码文件列表
     if (config.qr_code_url) {
@@ -249,6 +263,7 @@ const handleSubmit = async () => {
       platform: formState.platform,
       id: formState.id,
       qr_code_url: formState.qr_code_url,
+      pay_agreement: formState.pay_agreement,
     };
 
     // 如果已有配置ID，则更新；否则创建
