@@ -18,9 +18,17 @@ export interface ProductItem {
 
 /**
  * 获取商品列表
+ * @param currentPage 当前页码
+ * @param pageSize 每页数量
  */
-export const getProductListApi = () => {
-  return request.get<ProductItem[]>({ url: '/api/products/' });
+export const getProductListApi = (currentPage = 1, pageSize = 10) => {
+  return request.get<ProductItem[]>({ 
+    url: '/api/products/',
+    params: {
+      currentPage,
+      pageSize
+    }
+  });
 };
 
 /**

@@ -11,6 +11,7 @@
           :loading="loading"
           :pagination="paginationConfig"
           row-key="id"
+          @change="handleTableChange"
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'price'">
@@ -182,16 +183,26 @@ const handleCancel = () => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const response: any = await getProductListApi();
+    const response: any = await getProductListApi(paginationConfig.current, paginationConfig.pageSize);
     // 响应拦截器返回的是完整的 data 对象，包含 { code, message, data: { results, pagination } }
     if (response && response.data) {
       dataSource.value = response.data.results || [];
-      paginationConfig.total = response.data.pagination?.total || 0;
+      const pagination = response.data.pagination || {};
+      paginationConfig.total = pagination.total || 0;
+      // 更新当前页码（如果接口返回了页码信息）
+      if (pagination.page !== undefined && pagination.page !== null) {
+        paginationConfig.current = pagination.page;
+      }
     } else {
       dataSource.value = [];
       paginationConfig.total = 0;
     }
     console.log('商品列表数据:', dataSource.value);
+    console.log('分页信息:', {
+      current: paginationConfig.current,
+      pageSize: paginationConfig.pageSize,
+      total: paginationConfig.total
+    });
   } catch (error: any) {
     console.error('获取商品列表失败:', error);
     message.error(error?.message || '获取商品列表失败');
@@ -199,6 +210,16 @@ const loadData = async () => {
     paginationConfig.total = 0;
   } finally {
     loading.value = false;
+  }
+};
+
+// 处理表格变化事件（分页、排序、筛选）
+const handleTableChange = (pag: any) => {
+  console.log('表格变化事件:', pag);
+  if (pag) {
+    paginationConfig.current = pag.current || paginationConfig.current;
+    paginationConfig.pageSize = pag.pageSize || paginationConfig.pageSize;
+    loadData();
   }
 };
 
