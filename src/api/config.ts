@@ -14,6 +14,7 @@ export interface ConfigItem {
   updated_at?: string; // 更新时间
   qr_code_url?: string; // 二维码
   pay_agreement?: string; // 会员服务协议
+  trial_agreement?: string; // 恋爱裁判所协议
 }
 
 export interface ConfigResponse {

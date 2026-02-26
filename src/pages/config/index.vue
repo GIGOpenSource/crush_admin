@@ -59,6 +59,16 @@
             :maxlength="10000"
           />
         </a-form-item>
+
+        <a-form-item label="恋爱裁判所" name="trial_agreement">
+          <a-textarea
+            v-model:value="formState.trial_agreement"
+            placeholder="请输入恋爱裁判所协议内容"
+            :rows="10"
+            show-count
+            :maxlength="10000"
+          />
+        </a-form-item>
         
         <!-- <a-form-item v-if="activePlatform === 'ios'" label="审核模式" name="version">
           <a-switch
@@ -146,7 +156,8 @@ const formState = reactive<Partial<ConfigItem>>({
   version: '1',
   platform: 'ios', // 添加平台字段
   qr_code_url: '',
-  pay_agreement:''
+  pay_agreement: '',
+  trial_agreement: '',
 });
 
 const rules = {
@@ -161,6 +172,9 @@ const rules = {
   ],
   pay_agreement: [
     { required: false, message: '请输入会员服务协议内容', trigger: 'blur' },
+  ],
+  trial_agreement: [
+    { required: false, message: '请输入恋爱裁判所协议内容', trigger: 'blur' },
   ],
 };
 
@@ -199,6 +213,7 @@ const loadData = async () => {
     formState.id = config.id || '';
     formState.qr_code_url = config.qr_code_url;
     formState.pay_agreement = config.pay_agreement || '';
+    formState.trial_agreement = config.trial_agreement || '';
     
     // 设置二维码文件列表
     if (config.qr_code_url) {
@@ -264,6 +279,7 @@ const handleSubmit = async () => {
       id: formState.id,
       qr_code_url: formState.qr_code_url,
       pay_agreement: formState.pay_agreement,
+      trial_agreement: formState.trial_agreement,
     };
 
     // 如果已有配置ID，则更新；否则创建
@@ -298,6 +314,8 @@ const handleReset = () => {
   formState.about_us = originalData.value.about_us || '';
   formState.version = originalData.value.version || '1';
   formState.qr_code_url = originalData.value.qr_code_url;
+  formState.pay_agreement = originalData.value.pay_agreement || '';
+  formState.trial_agreement = originalData.value.trial_agreement || '';
   
   // 恢复二维码文件列表
   if (originalData.value.qr_code_url) {
