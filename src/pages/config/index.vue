@@ -70,14 +70,15 @@
           />
         </a-form-item>
         
-        <!-- <a-form-item v-if="activePlatform === 'ios'" label="审核模式" name="version">
+        <a-form-item v-if="activePlatform === 'wx'" label="开关" name="version">
           <a-switch
             :checked="versionSwitchValue"
-            checked-children="开启"
+            checked-children="打开"
             un-checked-children="关闭"
             @change="handleVersionChange"
           />
-        </a-form-item> -->
+          <span class="form-tip"></span>
+        </a-form-item>
         
         <a-form-item label="二维码" name="qr_code_url">
           <a-upload
@@ -178,12 +179,12 @@ const rules = {
   ],
 };
 
-// 审核模式开关值：version 为 '1' 时关闭(false)，'2' 时开启(true)
-const versionSwitchValue = computed(() => formState.version === '2');
+// 微信小程序开关：version 为 '1' 时打开(checked)，'2' 时关闭(unchecked)
+const versionSwitchValue = computed(() => formState.version === '1');
 
-// 处理审核模式开关变化
+// 处理微信小程序开关变化
 const handleVersionChange = (checked: boolean) => {
-  formState.version = checked ? '2' : '1';
+  formState.version = checked ? '1' : '2';
 };
 
 // 平台切换
@@ -512,6 +513,11 @@ onMounted(() => {
 .config-management {
   :deep(.ant-form-item-label) {
     font-weight: 500;
+  }
+  .form-tip {
+    margin-left: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
   }
 }
 </style>
