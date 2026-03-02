@@ -61,12 +61,9 @@
         </a-form-item>
 
         <a-form-item label="恋爱裁判所" name="trial_agreement">
-          <a-textarea
-            v-model:value="formState.trial_agreement"
+          <RichTextEditor
+            v-model="formState.trial_agreement"
             placeholder="请输入恋爱裁判所协议内容"
-            :rows="10"
-            show-count
-            :maxlength="10000"
           />
         </a-form-item>
         
@@ -128,6 +125,7 @@ import {
   type ConfigItem,
 } from '@/api/config';
 import { uploadImg, getTemplateImagesApi, type TemplateImageItem } from '@/api/template-library';
+import RichTextEditor from '@/components/RichTextEditor/index.vue';
 
 interface PlatformItem {
   key: string;

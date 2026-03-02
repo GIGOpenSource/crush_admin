@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue()],
+    optimizeDeps: {
+      include: ['@vueup/vue-quill', 'quill'],
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
