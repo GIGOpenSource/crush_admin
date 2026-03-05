@@ -138,6 +138,15 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'ControlOutlined',
         },
       },
+      {
+        path: '/projectItem',
+        name: 'projectItem',
+        component: () => import('@/pages/projectItem/index.vue'),
+        meta: {
+          title: '项目管理',
+          icon: 'ControlOutlined',
+        },
+      },
     ],
   },
 ];
